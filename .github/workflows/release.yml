@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Parse semver from commit message
+        id: semver
+        shell: bash
+        run: |
+          msg="${{ github.event.head_commit.message }}"
+          if [[ "$msg" =~ ^v?([0-9]+)\.([0-9]+)\.([0-9]+)([-+].*)?$ ]]; then
+            echo "tag=v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create tag
+        if: steps.semver.outputs.tag != ''
+        run: |
+          tag="${{ steps.semver.outputs.tag }}"
+          git tag -a "$tag" -m "Release $tag"
+          git push origin "$tag"
+      - name: Create GitHub release
+        if: steps.semver.outputs.tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.semver.outputs.tag }}
+          generate_release_notes: true
