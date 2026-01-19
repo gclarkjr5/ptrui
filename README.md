@@ -1,14 +1,15 @@
 # ptrui (Ratatui + Rust)
 
-ptrui is a tiny terminal UI (TUI) written in Rust using Ratatui. It lets you type English on the left and see the Spanish translation on the right, or switch to Spanish and translate back to English, using a translation API.
+ptrui is a tiny terminal UI (TUI) written in Rust using Ratatui. Type on either side to translate in real time using a translation API.
 
-## What you will learn
+## Features
 
-- How a Rust program is structured (`main`, functions, structs)
-- How to build a TUI with Ratatui
-- How to handle keyboard input with Crossterm
-- How to keep application state in sync
-- How to call an HTTP API from a TUI app
+- Bidirectional translation with independent source/target panes
+- Vim-style editing modes (normal/insert/visual) with familiar motions
+- Language picker with fuzzy search for both panes
+- Debounced API calls with live status ("translating", "ready", errors)
+- Clear active pane or "native-ize" both sides on demand
+- Configurable auth header and key for API requests
 
 ## Running the app
 
@@ -39,62 +40,6 @@ Controls:
 
 - `src/main.rs` contains all the code
 - `Cargo.toml` lists dependencies
-
-## How the code works (walkthrough)
-
-### 1) State
-
-The `App` struct stores the live state for the UI:
-
-- `active` determines which side gets keyboard input
-- `input` is the left (English) text
-- `output` is the right (Spanish) text
-- `pending_translation` tracks queued API calls
-- `error` stores the last API error (if any)
-
-### 2) Terminal setup
-
-In `main`, the program:
-
-- Enables raw mode (so key presses are available immediately)
-- Enters an alternate screen (so the TUI does not overwrite your shell)
-- Builds a `Terminal` with a Crossterm backend
-
-When the app exits, it restores the terminal settings.
-
-### 3) Event loop
-
-`run_app` is the main loop. Each iteration:
-
-1. Draws the UI (`draw_ui`)
-2. Polls for keyboard input
-3. Updates state based on the key pressed
-
-Whenever you type or delete a character, the app schedules an API translation once input settles.
-
-### 4) Rendering
-
-The UI is built with Ratatui widgets:
-
-- A header at the top
-- Two side-by-side panels for translation
-- A controls panel at the bottom
-
-Ratatui layouts split the screen into rectangles (`Layout::split`), and each widget renders into a rectangle.
-
-### 5) Translation
-
-The app posts JSON to a translation API and expects a response shaped like:
-
-```json
-{ "translations": [{ "text": "..." }] }
-```
-
-## Suggested exercises
-
-- Add a language selector
-- Cache recent translations
-- Show a "translating..." spinner next to the active pane
 
 ## Dependencies
 
