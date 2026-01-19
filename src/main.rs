@@ -3,13 +3,15 @@ use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind, KeyModifiers};
 use crossterm::execute;
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
+use crossterm::terminal::{
+    EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
+};
+use ratatui::Terminal;
 use ratatui::backend::CrosstermBackend;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph, Wrap};
-use ratatui::Terminal;
 use serde::{Deserialize, Serialize};
 use std::env;
 use tui_textarea::{CursorMove, Input, Key, Scrolling, TextArea};
@@ -23,19 +25,58 @@ struct Language {
 }
 
 const LANGUAGES: &[Language] = &[
-    Language { name: "English", code: "EN" },
-    Language { name: "Spanish", code: "ES" },
-    Language { name: "French", code: "FR" },
-    Language { name: "German", code: "DE" },
-    Language { name: "Italian", code: "IT" },
-    Language { name: "Portuguese", code: "PT" },
-    Language { name: "Dutch", code: "NL" },
-    Language { name: "Polish", code: "PL" },
-    Language { name: "Russian", code: "RU" },
-    Language { name: "Japanese", code: "JA" },
-    Language { name: "Chinese", code: "ZH" },
-    Language { name: "Korean", code: "KO" },
-    Language { name: "Swedish", code: "SV" },
+    Language {
+        name: "English",
+        code: "EN",
+    },
+    Language {
+        name: "Spanish",
+        code: "ES",
+    },
+    Language {
+        name: "French",
+        code: "FR",
+    },
+    Language {
+        name: "German",
+        code: "DE",
+    },
+    Language {
+        name: "Italian",
+        code: "IT",
+    },
+    Language {
+        name: "Portuguese",
+        code: "PT",
+    },
+    Language {
+        name: "Dutch",
+        code: "NL",
+    },
+    Language {
+        name: "Polish",
+        code: "PL",
+    },
+    Language {
+        name: "Russian",
+        code: "RU",
+    },
+    Language {
+        name: "Japanese",
+        code: "JA",
+    },
+    Language {
+        name: "Chinese",
+        code: "ZH",
+    },
+    Language {
+        name: "Korean",
+        code: "KO",
+    },
+    Language {
+        name: "Swedish",
+        code: "SV",
+    },
 ];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -102,11 +143,26 @@ impl Vim {
         match self.mode {
             Mode::Normal | Mode::Visual | Mode::Operator(_) => {
                 match input {
-                    Input { key: Key::Char('h'), .. } => textarea.move_cursor(CursorMove::Back),
-                    Input { key: Key::Char('j'), .. } => textarea.move_cursor(CursorMove::Down),
-                    Input { key: Key::Char('k'), .. } => textarea.move_cursor(CursorMove::Up),
-                    Input { key: Key::Char('l'), .. } => textarea.move_cursor(CursorMove::Forward),
-                    Input { key: Key::Char('w'), .. } => textarea.move_cursor(CursorMove::WordForward),
+                    Input {
+                        key: Key::Char('h'),
+                        ..
+                    } => textarea.move_cursor(CursorMove::Back),
+                    Input {
+                        key: Key::Char('j'),
+                        ..
+                    } => textarea.move_cursor(CursorMove::Down),
+                    Input {
+                        key: Key::Char('k'),
+                        ..
+                    } => textarea.move_cursor(CursorMove::Up),
+                    Input {
+                        key: Key::Char('l'),
+                        ..
+                    } => textarea.move_cursor(CursorMove::Forward),
+                    Input {
+                        key: Key::Char('w'),
+                        ..
+                    } => textarea.move_cursor(CursorMove::WordForward),
                     Input {
                         key: Key::Char('e'),
                         ctrl: false,
@@ -122,18 +178,33 @@ impl Vim {
                         ctrl: false,
                         ..
                     } => textarea.move_cursor(CursorMove::WordBack),
-                    Input { key: Key::Char('^'), .. } => textarea.move_cursor(CursorMove::Head),
-                    Input { key: Key::Char('$'), .. } => textarea.move_cursor(CursorMove::End),
-                    Input { key: Key::Char('D'), .. } => {
+                    Input {
+                        key: Key::Char('^'),
+                        ..
+                    } => textarea.move_cursor(CursorMove::Head),
+                    Input {
+                        key: Key::Char('$'),
+                        ..
+                    } => textarea.move_cursor(CursorMove::End),
+                    Input {
+                        key: Key::Char('D'),
+                        ..
+                    } => {
                         textarea.delete_line_by_end();
                         return Transition::Mode(Mode::Normal);
                     }
-                    Input { key: Key::Char('C'), .. } => {
+                    Input {
+                        key: Key::Char('C'),
+                        ..
+                    } => {
                         textarea.delete_line_by_end();
                         textarea.cancel_selection();
                         return Transition::Mode(Mode::Insert);
                     }
-                    Input { key: Key::Char('p'), .. } => {
+                    Input {
+                        key: Key::Char('p'),
+                        ..
+                    } => {
                         textarea.paste();
                         return Transition::Mode(Mode::Normal);
                     }
@@ -153,36 +224,57 @@ impl Vim {
                         textarea.redo();
                         return Transition::Mode(Mode::Normal);
                     }
-                    Input { key: Key::Char('x'), .. } => {
+                    Input {
+                        key: Key::Char('x'),
+                        ..
+                    } => {
                         textarea.delete_next_char();
                         return Transition::Mode(Mode::Normal);
                     }
-                    Input { key: Key::Char('i'), .. } => {
+                    Input {
+                        key: Key::Char('i'),
+                        ..
+                    } => {
                         textarea.cancel_selection();
                         return Transition::Mode(Mode::Insert);
                     }
-                    Input { key: Key::Char('a'), .. } => {
+                    Input {
+                        key: Key::Char('a'),
+                        ..
+                    } => {
                         textarea.cancel_selection();
                         textarea.move_cursor(CursorMove::Forward);
                         return Transition::Mode(Mode::Insert);
                     }
-                    Input { key: Key::Char('A'), .. } => {
+                    Input {
+                        key: Key::Char('A'),
+                        ..
+                    } => {
                         textarea.cancel_selection();
                         textarea.move_cursor(CursorMove::End);
                         return Transition::Mode(Mode::Insert);
                     }
-                    Input { key: Key::Char('o'), .. } => {
+                    Input {
+                        key: Key::Char('o'),
+                        ..
+                    } => {
                         textarea.move_cursor(CursorMove::End);
                         textarea.insert_newline();
                         return Transition::Mode(Mode::Insert);
                     }
-                    Input { key: Key::Char('O'), .. } => {
+                    Input {
+                        key: Key::Char('O'),
+                        ..
+                    } => {
                         textarea.move_cursor(CursorMove::Head);
                         textarea.insert_newline();
                         textarea.move_cursor(CursorMove::Up);
                         return Transition::Mode(Mode::Insert);
                     }
-                    Input { key: Key::Char('I'), .. } => {
+                    Input {
+                        key: Key::Char('I'),
+                        ..
+                    } => {
                         textarea.cancel_selection();
                         textarea.move_cursor(CursorMove::Head);
                         return Transition::Mode(Mode::Insert);
@@ -398,9 +490,7 @@ impl App {
             return self.handle_picker_key(key);
         }
         match key.code {
-            KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                AppAction::Quit
-            }
+            KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => AppAction::Quit,
             KeyCode::Char('h') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 self.open_picker(ActiveSide::Left);
                 AppAction::None
@@ -556,8 +646,8 @@ fn main() -> io::Result<()> {
 
 fn run_app(terminal: &mut Terminal<CrosstermBackend<Stdout>>) -> io::Result<()> {
     let mut app = App::new();
-    let api = PtruiApi::from_env()
-        .map_err(|message| io::Error::new(io::ErrorKind::Other, message))?;
+    let api =
+        PtruiApi::from_env().map_err(|message| io::Error::new(io::ErrorKind::Other, message))?;
     let poll_rate = Duration::from_millis(100);
 
     loop {
@@ -604,10 +694,7 @@ fn draw_header(frame: &mut ratatui::Frame, area: Rect, _app: &App) {
     let title = Line::from(vec![
         Span::styled("ptrui", Style::default().add_modifier(Modifier::BOLD)),
         Span::raw("  |  "),
-        Span::styled(
-            "tab to switch",
-            Style::default().fg(Color::Green),
-        ),
+        Span::styled("tab to switch", Style::default().fg(Color::Green)),
     ]);
 
     let block = Block::default()
@@ -625,12 +712,8 @@ fn draw_translator(frame: &mut ratatui::Frame, area: Rect, app: &App) {
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
         .split(area);
 
-    let left_language = LANGUAGES
-        .get(app.left_language)
-        .unwrap_or(&LANGUAGES[0]);
-    let right_language = LANGUAGES
-        .get(app.right_language)
-        .unwrap_or(&LANGUAGES[0]);
+    let left_language = LANGUAGES.get(app.left_language).unwrap_or(&LANGUAGES[0]);
+    let right_language = LANGUAGES.get(app.right_language).unwrap_or(&LANGUAGES[0]);
     let left_title = match app.active {
         ActiveSide::Left => format!("{} (active, {})", left_language.name, app.active_mode()),
         ActiveSide::Right => left_language.name.to_string(),
@@ -639,7 +722,9 @@ fn draw_translator(frame: &mut ratatui::Frame, area: Rect, app: &App) {
         ActiveSide::Left => right_language.name.to_string(),
         ActiveSide::Right => format!("{} (active, {})", right_language.name, app.active_mode()),
     };
-    let text_style = Style::default().fg(Color::LightBlue).add_modifier(Modifier::BOLD);
+    let text_style = Style::default()
+        .fg(Color::LightBlue)
+        .add_modifier(Modifier::BOLD);
     let left_block = Block::default()
         .borders(Borders::ALL)
         .title(left_title)
@@ -764,7 +849,10 @@ fn filtered_language_indices(query: &str) -> Vec<usize> {
             matches.push((score, index));
         }
     }
-    matches.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| LANGUAGES[a.1].name.cmp(LANGUAGES[b.1].name)));
+    matches.sort_by(|a, b| {
+        a.0.cmp(&b.0)
+            .then_with(|| LANGUAGES[a.1].name.cmp(LANGUAGES[b.1].name))
+    });
     matches.into_iter().map(|(_, index)| index).collect()
 }
 
@@ -800,12 +888,8 @@ fn maybe_translate(app: &mut App, api: &PtruiApi) {
         return;
     }
 
-    let left_lang = LANGUAGES
-        .get(app.left_language)
-        .unwrap_or(&LANGUAGES[0]);
-    let right_lang = LANGUAGES
-        .get(app.right_language)
-        .unwrap_or(&LANGUAGES[0]);
+    let left_lang = LANGUAGES.get(app.left_language).unwrap_or(&LANGUAGES[0]);
+    let right_lang = LANGUAGES.get(app.right_language).unwrap_or(&LANGUAGES[0]);
     let (source_text, source_lang, target_lang, target_slot) = match app.active {
         ActiveSide::Left => (
             textarea_text(&app.input),
@@ -855,7 +939,6 @@ fn translate_via_api(
     if let (Some(header), Some(value)) = (&api.auth_header, &api.auth_value) {
         request = request.header(header, value);
         // println!("Request: {:?}", request);
-        
     }
     let response = request
         .send()
@@ -879,12 +962,8 @@ fn translate_via_api(
 }
 
 fn nativeize_both(app: &mut App, api: &PtruiApi) {
-    let left_lang = LANGUAGES
-        .get(app.left_language)
-        .unwrap_or(&LANGUAGES[0]);
-    let right_lang = LANGUAGES
-        .get(app.right_language)
-        .unwrap_or(&LANGUAGES[0]);
+    let left_lang = LANGUAGES.get(app.left_language).unwrap_or(&LANGUAGES[0]);
+    let right_lang = LANGUAGES.get(app.right_language).unwrap_or(&LANGUAGES[0]);
     let left_source = textarea_text(&app.input);
     let right_source = textarea_text(&app.output);
     if left_source.trim().is_empty() && right_source.trim().is_empty() {
