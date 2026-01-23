@@ -1,6 +1,6 @@
-# ptrui
+# Ptrui
 
-ptrui (pronounced "pe-true-ee") is a tiny terminal translation tool with a two-pane workflow for live, bidirectional translation. It is written in Rust using Ratatui and a translation API.
+Ptrui (pronounced "pe-true-ee") is a tiny terminal translation tool with a two-pane workflow for live, bidirectional translation. It is written in Rust using Ratatui and a translation API.
 
 ## Features
 
