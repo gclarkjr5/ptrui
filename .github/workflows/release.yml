@@ -8,8 +8,10 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  tag:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.semver.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,9 +32,66 @@ jobs:
           tag="${{ steps.semver.outputs.tag }}"
           git tag -a "$tag" -m "Release $tag"
           git push origin "$tag"
+
+  create_release:
+    needs: tag
+    if: needs.tag.outputs.tag != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Create GitHub release
-        if: steps.semver.outputs.tag != ''
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.semver.outputs.tag }}
+          tag_name: ${{ needs.tag.outputs.tag }}
           generate_release_notes: true
+
+  build_artifacts:
+    needs: create_release
+    if: needs.tag.outputs.tag != ''
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive: tar.gz
+            bin_ext: ""
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            archive: tar.gz
+            bin_ext: ""
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            archive: tar.gz
+            bin_ext: ""
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive: zip
+            bin_ext: ".exe"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Build release
+        run: cargo build --release --locked --target ${{ matrix.target }}
+      - name: Package artifact
+        shell: bash
+        run: |
+          name="ptrui-${{ needs.tag.outputs.tag }}-${{ matrix.target }}"
+          bin="target/${{ matrix.target }}/release/ptrui${{ matrix.bin_ext }}"
+          mkdir -p dist
+          if [[ "${{ matrix.archive }}" == "zip" ]]; then
+            7z a "dist/${name}.zip" "$bin"
+          else
+            tar -czf "dist/${name}.tar.gz" -C "$(dirname "$bin")" "$(basename "$bin")"
+          fi
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.tag.outputs.tag }}
+          files: dist/*

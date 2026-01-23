@@ -4,7 +4,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph, Wrap};
 
 use crate::app::{ActiveSide, App};
-use crate::languages::{filtered_language_indices, LANGUAGES};
+use crate::languages::{LANGUAGES, filtered_language_indices};
 
 pub fn draw_ui(frame: &mut ratatui::Frame, app: &App) {
     // The screen is vertically split into a header, app, and controls.

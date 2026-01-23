@@ -7,7 +7,7 @@ use ratatui::backend::CrosstermBackend;
 use tui_textarea::{Input, TextArea};
 
 use crate::api::{PtruiApi, translate_via_api};
-use crate::languages::{filtered_language_indices, find_language_index, LANGUAGES};
+use crate::languages::{LANGUAGES, filtered_language_indices, find_language_index};
 use crate::textarea::{set_textarea_text, textarea_input_from_key, textarea_text};
 use crate::ui::draw_ui;
 use crate::vim::{Mode, Transition, Vim};
