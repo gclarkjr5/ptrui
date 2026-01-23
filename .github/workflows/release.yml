@@ -38,7 +38,7 @@ jobs:
           echo "$cargo_version"
           echo "--------------------------"
 
-          if [[ "$msg" =~ ^chore\(release\):[ ]*v?([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?)$ ]]; then
+          if [[ "$msg" =~ ^chore\(release\):[[:space:]]*v?([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?)$ ]]; then
             commit_version="${BASH_REMATCH[1]}"
             echo "Evaluating extracted version match:"
             echo "--------------------------"
