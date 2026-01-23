@@ -83,7 +83,7 @@ jobs:
           generate_release_notes: true
 
   build_artifacts:
-    needs: create_release
+    needs: [tag, create_release]
     if: needs.tag.outputs.tag != ''
     runs-on: ${{ matrix.os }}
     strategy:
