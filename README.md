@@ -47,3 +47,20 @@ Controls:
 - [crossterm](https://docs.rs/crossterm)
 - [reqwest](https://docs.rs/reqwest)
 - [serde](https://docs.rs/serde)
+
+## Release workflow
+
+Release tags are the trigger for producing a release. Use the following format and steps.
+
+Release format (required):
+
+- Git tag format: `vX.Y.Z` (for example `v0.2.0`)
+- `Cargo.toml` version must match `X.Y.Z`
+
+Steps:
+
+1. Update the version in `Cargo.toml`.
+2. Run `cargo build` (or `cargo test`) to refresh `Cargo.lock` if needed.
+3. Commit the version bump.
+4. Create an annotated tag matching the version, for example: `git tag -a v0.2.0 -m "v0.2.0"`.
+5. Push the commit and tag: `git push && git push --tags`.
